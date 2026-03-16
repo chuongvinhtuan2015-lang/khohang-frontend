@@ -1,0 +1,2 @@
+/* App.css - Minimal extras */
+input:focus, button:focus { outline: none; }
