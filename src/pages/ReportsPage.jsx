@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../services/axiosClient';
-import { 
-  Calendar, 
-  Download, 
-  BarChart2, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Calendar,
+  Download,
+  BarChart2,
+  TrendingUp,
+  TrendingDown,
   Package,
   Layers,
   ArrowRight
@@ -43,7 +43,7 @@ const ReportsPage = () => {
 
   const exportExcel = () => {
     if (!data) return;
-    
+
     let exportData = [];
     let fileName = '';
 
@@ -57,7 +57,7 @@ const ReportsPage = () => {
         'Số phiếu Xuất': d.count_out,
         'Chênh lệch': d.export_value - d.import_value
       })));
-      
+
       // Sheet 2: Danh sách chi tiết phiếu
       const logSheet = XLSX.utils.json_to_sheet(data.transactionsLog.map(t => ({
         'Mã phiếu': t.transaction_code,
@@ -124,32 +124,32 @@ const ReportsPage = () => {
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
               <Calendar size={14} /> Từ ngày
             </label>
-            <input 
-              type="date" 
-              className="form-control" 
+            <input
+              type="date"
+              className="form-control"
               max={dateRange.endDate || new Date().toISOString().split('T')[0]}
               value={dateRange.startDate}
-              onChange={e => setDateRange({...dateRange, startDate: e.target.value})}
+              onChange={e => setDateRange({ ...dateRange, startDate: e.target.value })}
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
               <Calendar size={14} /> Đến ngày
             </label>
-            <input 
-              type="date" 
-              className="form-control" 
+            <input
+              type="date"
+              className="form-control"
               max={new Date().toISOString().split('T')[0]}
               min={dateRange.startDate}
               value={dateRange.endDate}
-              onChange={e => setDateRange({...dateRange, endDate: e.target.value})}
+              onChange={e => setDateRange({ ...dateRange, endDate: e.target.value })}
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>Loại báo cáo</label>
-            <select 
-              className="form-control" 
-              value={reportType} 
+            <select
+              className="form-control"
+              value={reportType}
               onChange={e => setReportType(e.target.value)}
               style={{ width: 200 }}
             >
@@ -213,7 +213,7 @@ const ReportsPage = () => {
                 {reportType === 'categories' && 'Phân tích theo danh mục'}
               </h3>
             </div>
-            
+
             <div className="table-wrapper">
               <table style={{ width: '100%' }}>
                 <thead>
@@ -264,7 +264,7 @@ const ReportsPage = () => {
                     <tr key={i}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div className="stat-icon emerald" style={{ width: 32, height: 32, fontSize: 12 }}>{i+1}</div>
+                          <div className="stat-icon emerald" style={{ width: 32, height: 32, fontSize: 12 }}>{i + 1}</div>
                           <span style={{ fontWeight: 500 }}>{p.product_name}</span>
                         </div>
                       </td>
@@ -280,7 +280,7 @@ const ReportsPage = () => {
                     <tr key={i}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div className="stat-icon rose" style={{ width: 32, height: 32, fontSize: 12 }}>{i+1}</div>
+                          <div className="stat-icon rose" style={{ width: 32, height: 32, fontSize: 12 }}>{i + 1}</div>
                           <span style={{ fontWeight: 500 }}>{p.product_name}</span>
                         </div>
                       </td>
@@ -309,10 +309,10 @@ const ReportsPage = () => {
                       <td style={{ textAlign: 'right', fontWeight: 600 }}>{formatVND(c.value)}</td>
                       <td>
                         <div style={{ width: '100%', height: 8, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-                          <div style={{ 
-                            width: `${Math.min(100, (c.value / (data.summary.total_export || 1)) * 100)}%`, 
-                            height: '100%', 
-                            background: '#6366f1' 
+                          <div style={{
+                            width: `${Math.min(100, (c.value / (data.summary.total_export || 1)) * 100)}%`,
+                            height: '100%',
+                            background: '#6366f1'
                           }}></div>
                         </div>
                       </td>
