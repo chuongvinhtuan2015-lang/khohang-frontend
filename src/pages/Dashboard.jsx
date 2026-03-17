@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../services/axiosClient';
-import { 
-  TrendingUp, 
-  Package, 
-  ShoppingBag, 
+import {
+  TrendingUp,
+  Package,
+  ShoppingBag,
   AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
@@ -94,10 +94,10 @@ const BarChart = ({ data }) => {
 };
 
 const formatPrice = (p) => {
-  if (p >= 1e9) return (p / 1e9).toFixed(1) + ' tỷ';
-  if (p >= 1e6) return (p / 1e6).toFixed(1) + ' tr';
-  if (p >= 1e3) return (p / 1e3).toFixed(0) + 'k';
-  return String(p);
+  if (p >= 1e9) return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1 }).format(p / 1e9) + '\u00A0tỷ';
+  if (p >= 1e6) return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1 }).format(p / 1e6) + '\u00A0tr';
+  if (p >= 1e3) return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(p / 1e3) + '\u00A0k';
+  return new Intl.NumberFormat('vi-VN').format(p);
 };
 
 const Dashboard = () => {
@@ -117,7 +117,7 @@ const Dashboard = () => {
     return (
       <div style={{ textAlign: 'center', padding: 80 }}>
         <div className="spinner"></div>
-        <p style={{ color: '#64748b' }}>Đang tải dữ liệu...</p>
+        <p style={{ color: '#64748b' }}>Đang tải dữ liệu…</p>
       </div>
     );
   }
@@ -129,15 +129,19 @@ const Dashboard = () => {
     const diffMs = now - date;
     const diffMin = Math.floor(diffMs / 60000);
     if (diffMin < 1) return 'Vừa xong';
-    if (diffMin < 60) return `${diffMin} phút trước`;
+    if (diffMin < 60) return `${diffMin}\u00A0phút trước`;
     const diffHrs = Math.floor(diffMin / 60);
-    if (diffHrs < 24) return `${diffHrs} giờ trước`;
-    return date.toLocaleDateString('vi-VN');
+    if (diffHrs < 24) return `${diffHrs}\u00A0giờ trước`;
+    return new Intl.DateTimeFormat('vi-VN').format(date);
   };
 
   return (
     <div className="fade-in">
-      <div className="page-header">
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <div>
+          <h1 className="page-title" style={{ fontSize: 24 }}>Tổng quan</h1>
+          <p className="page-subtitle">Theo dõi hoạt động kinh doanh và tồn kho của bạn.</p>
+        </div>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: 24 }}>
@@ -154,8 +158,8 @@ const Dashboard = () => {
               <h3 className="card-title">Biểu đồ nhập/xuất kho</h3>
               <p className="card-subtitle">Theo giá trị giao dịch</p>
             </div>
-            <select 
-              className="form-control form-select" 
+            <select
+              className="form-control form-select"
               style={{ width: 140 }}
               value={range}
               onChange={(e) => setRange(e.target.value)}

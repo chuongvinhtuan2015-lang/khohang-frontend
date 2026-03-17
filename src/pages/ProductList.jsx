@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../services/axiosClient';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit2, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit2,
   Trash2,
   Package,
   Layers,
   ChevronRight,
   ChevronLeft,
   X,
+  Pencil,
   FileSpreadsheet
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
@@ -24,8 +25,10 @@ const ProductList = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ sku: '', name: '', category_id: '', supplier_id: '', unit: '', price: '' });
-  
+
+
   // Pagination & Filter States
+  const [editId, setEditId] = useState(null);
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [page, setPage] = useState(1);
@@ -71,7 +74,18 @@ const ProductList = () => {
     setPage(1); // Reset to page 1 on new search
     fetchProducts();
   };
-
+  const handleEdit = (product) => {
+    setEditId(product.id);
+    setForm({
+      sku: product.sku,
+      name: product.name,
+      category_id: product.category_id,
+      supplier_id: product.supplier_id,
+      unit: product.unit,
+      price: product.price
+    });
+    setShowModal(true);
+  }
   const handleDelete = async (id) => {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
     try {
@@ -81,14 +95,27 @@ const ProductList = () => {
       alert('Lỗi: ' + (err.response?.data?.message || err.message));
     }
   };
-
+  const closeModal = () => {
+    setShowModal(false);
+    setEditId(null);
+    setForm({ sku: '', name: '', category_id: '', supplier_id: '', unit: '', price: '' });
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosClient.post('/products', {
-        ...form,
-        price: Number(form.price)
-      });
+
+      if (editId) {
+        await axiosClient.put(`/products/${editId}`, {
+          ...form,
+          price: Number(form.price)
+        });
+      } else {
+        await axiosClient.post('/products', {
+          ...form,
+          price: Number(form.price)
+        });
+      }
+      setEditId(null);
       setShowModal(false);
       setForm({ sku: '', name: '', category_id: '', supplier_id: '', unit: '', price: '' });
       fetchProducts();
@@ -141,16 +168,18 @@ const ProductList = () => {
         <div className="table-toolbar">
           <form className="table-search" onSubmit={handleSearch}>
             <Search size={16} className="table-search-icon" />
-            <input 
-              type="text" 
-              placeholder="Tìm theo SKU hoặc tên..." 
+            <input
+              type="text"
+              name="searchProduct"
+              autoComplete="off"
+              placeholder="Tìm theo SKU hoặc tên…"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </form>
           <div style={{ display: 'flex', gap: 8 }}>
-            <select 
-              className="form-control form-select" 
+            <select
+              className="form-control form-select"
               style={{ width: 180 }}
               value={categoryId}
               onChange={e => { setCategoryId(e.target.value); setPage(1); }}
@@ -177,7 +206,7 @@ const ProductList = () => {
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0' }}>
                     <div className="spinner"></div>
-                    <p style={{ color: '#64748b', marginTop: 12 }}>Đang tải dữ liệu...</p>
+                    <p style={{ color: '#64748b', marginTop: 12 }}>Đang tải dữ liệu…</p>
                   </td>
                 </tr>
               ) : products.length === 0 ? (
@@ -226,6 +255,9 @@ const ProductList = () => {
                     <td>
                       {isManager() && (
                         <div className="action-btns" style={{ opacity: 1 }}>
+                          <button className='action-btn edit' onClick={() => handleEdit(product)}>
+                            <Pencil size={15} />
+                          </button>
                           <button className="action-btn delete" onClick={() => handleDelete(product.id)}>
                             <Trash2 size={15} />
                           </button>
@@ -245,16 +277,16 @@ const ProductList = () => {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ fontSize: 13, color: '#64748b' }}>Trang {page} / {totalPages || 1}</span>
             <div style={{ display: 'flex', gap: 4 }}>
-              <button 
-                className="action-btn" 
+              <button
+                className="action-btn"
                 style={{ border: '1px solid #e2e8f0' }}
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
               >
                 <ChevronLeft size={16} />
               </button>
-              <button 
-                className="action-btn" 
+              <button
+                className="action-btn"
                 style={{ border: '1px solid #e2e8f0' }}
                 disabled={page >= totalPages}
                 onClick={() => setPage(page + 1)}
@@ -267,22 +299,22 @@ const ProductList = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+        <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={e => e.stopPropagation()} style={{ width: 500 }}>
             <div className="modal-header">
-              <h3>Thêm sản phẩm mới</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}><X size={18} /></button>
+              {editId ? <h3>Cập nhật sản phẩm</h3> : <h3>Thêm sản phẩm mới</h3>}
+              <button className="modal-close" onClick={closeModal}><X size={18} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-row">
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>Mã sản phẩm (SKU) *</label>
-                    <input className="form-control" type="text" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} required placeholder="VD: SP001" />
+                    <input className="form-control" disabled={editId} type="text" name="sku" autoComplete="off" spellCheck={false} value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} required placeholder="VD: SP001" />
                   </div>
                   <div className="form-group" style={{ flex: 2 }}>
                     <label>Tên sản phẩm *</label>
-                    <input className="form-control" type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required placeholder="Tên sản phẩm" />
+                    <input className="form-control" type="text" name="name" autoComplete="off" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required placeholder="Tên sản phẩm" />
                   </div>
                 </div>
 
@@ -306,11 +338,11 @@ const ProductList = () => {
                 <div className="form-row">
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>Đơn vị tính *</label>
-                    <input className="form-control" type="text" value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} required placeholder="Chiếc, Hộp, Kg..." />
+                    <input className="form-control" type="text" name="unit" autoComplete="off" value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} required placeholder="Chiếc, Hộp, Kg…" />
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
                     <label>Đơn giá (VNĐ) *</label>
-                    <input className="form-control" type="number" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required placeholder="0" />
+                    <input className="form-control" type="number" name="price" autoComplete="off" inputMode="numeric" min="0" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required placeholder="0" />
                   </div>
                 </div>
               </div>
