@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../services/axiosClient';
+import { useGlobalData } from '../context/GlobalDataContext';
 import { Plus, ArrowUpRight, X, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ExportPage = () => {
+  const { allProducts: products, fetchAllProducts } = useGlobalData();
   const [transactions, setTransactions] = useState([]);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState(null);
@@ -19,19 +20,12 @@ const ExportPage = () => {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchProducts();
+    fetchAllProducts();
   }, []);
 
   useEffect(() => {
     fetchTransactions();
   }, [page, limit]);
-
-  const fetchProducts = async () => {
-    try {
-      const res = await axiosClient.get('/products?limit=1000');
-      setProducts(res.data.data);
-    } catch (err) { console.error(err); }
-  };
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -43,6 +37,7 @@ const ExportPage = () => {
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
+
 
   const handleSearch = (e) => {
     e.preventDefault();

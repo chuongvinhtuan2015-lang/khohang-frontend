@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../services/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import { useGlobalData } from '../context/GlobalDataContext';
 import {
   Plus,
   Search,
@@ -19,13 +20,11 @@ import * as XLSX from 'xlsx';
 
 const ProductList = () => {
   const { isManager } = useAuth();
+  const { categories, suppliers, fetchCategories, fetchSuppliers } = useGlobalData();
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ sku: '', name: '', category_id: '', supplier_id: '', unit: '', price: '' });
-
 
   // Pagination & Filter States
   const [editId, setEditId] = useState(null);
@@ -37,23 +36,13 @@ const ProductList = () => {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchCategoriesAndSuppliers();
+    fetchCategories();
+    fetchSuppliers();
   }, []);
 
   useEffect(() => {
     fetchProducts();
   }, [page, limit, categoryId]); // Reload when page or filter changes
-
-  const fetchCategoriesAndSuppliers = async () => {
-    try {
-      const [catRes, supRes] = await Promise.all([
-        axiosClient.get('/categories'),
-        axiosClient.get('/suppliers')
-      ]);
-      setCategories(catRes.data);
-      setSuppliers(supRes.data);
-    } catch (err) { console.error(err); }
-  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -68,6 +57,7 @@ const ProductList = () => {
       setLoading(false);
     }
   };
+
 
   const handleSearch = (e) => {
     e.preventDefault();

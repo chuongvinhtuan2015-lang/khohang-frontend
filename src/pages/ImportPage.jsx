@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../services/axiosClient';
+import { useGlobalData } from '../context/GlobalDataContext';
 import { Plus, ArrowDownLeft, X, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ImportPage = () => {
+  const { allProducts: products, fetchAllProducts } = useGlobalData();
   const [transactions, setTransactions] = useState([]);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState(null);
@@ -19,19 +20,12 @@ const ImportPage = () => {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    fetchProducts();
+    fetchAllProducts();
   }, []);
 
   useEffect(() => {
     fetchTransactions();
   }, [page, limit]);
-
-  const fetchProducts = async () => {
-    try {
-      const res = await axiosClient.get('/products?limit=1000'); // Lấy hết để chọn
-      setProducts(res.data.data);
-    } catch (err) { console.error(err); }
-  };
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -46,6 +40,7 @@ const ImportPage = () => {
       setLoading(false);
     }
   };
+
 
   const handleSearch = (e) => {
     e.preventDefault();
