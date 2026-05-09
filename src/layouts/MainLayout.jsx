@@ -85,6 +85,7 @@ const Header = () => {
     if (path === '/export') return 'Xuất kho';
     if (path === '/users') return 'Nhân viên';
     if (path === '/reports') return 'Báo cáo & Thống kê';
+    if (path === '/security') return 'Trung tâm Bảo mật';
     return 'Trang chủ';
   };
 
